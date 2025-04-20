@@ -63,7 +63,7 @@ public class ToDoSeedData
             // إضافة مهام تجريبية للمستخدمين
             var todoService = serviceProvider.GetRequiredService<IToDoItemService>();
 
-            if (!todoService.GetAll().Any())
+            if (!todoService.GetAllAsync().Result.Any())
             {
                 var defaultItems = new List<ToDoItem>
                 {
@@ -73,10 +73,11 @@ public class ToDoSeedData
 
                 foreach (var item in defaultItems)
                 {
-                    todoService.Create(item);  // استخدام خدمة المهام لإنشاء المهام في قاعدة البيانات
+                  await  todoService.CreateAsync(item);  // استخدام خدمة المهام لإنشاء المهام في قاعدة البيانات
                 }
+            
             }
-
+            
 
         }
     }

@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using ToDoApp.Domain.Entities;
 
-namespace ToDoApp.Application.Interfaces
+namespace ToDoApp.Domain.Repositories
 {
-    public interface IToDoItemService
+    public interface IToDoItemRepository
     {
         Task<IEnumerable<ToDoItem>> GetAllAsync();
+        Task<ToDoItem> GetByIdAsync(int id);
         Task<ToDoItem> CreateAsync(ToDoItem toDoItem);
-        Task<bool> UpdateAsync(int id, ToDoItem toDoItem);
-        Task<bool> DeleteAsync(int id);
+        Task<ToDoItem> UpdateAsync(ToDoItem toDoItem);
+        Task DeleteAsync(int id);
     }
 }

@@ -5,7 +5,9 @@ using Microsoft.OpenApi.Models;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Application.Services;
 using ToDoApp.Domain.Entities;
+using ToDoApp.Domain.Repositories;
 using ToDoApp.Infrastructure.Data;
+using ToDoApp.Infrastructure.Repositories;
 using static ToDoApp.Infrastructure.SeedData.ToDoSeedData;
 
 
@@ -71,7 +73,8 @@ builder.Services.AddSwaggerGen(c =>
 
 // Add services for Application Layer (Dependency Injection)
 builder.Services.AddScoped<IToDoItemService, ToDoItemService>();
-
+builder.Services.AddScoped<IToDoItemRepository, ToDoItemRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 
@@ -93,6 +96,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseRouting();
+app.UseHttpsRedirection();
 
 // Enable Authentication and Authorization middleware
 app.UseAuthentication();
@@ -104,30 +108,15 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     await SeedData.Initialize(services, userManager);
 }
+
+
+
 app.MapControllers();
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-//app.MapGet("/weatherforecast", () =>
-//{
-//    var forecast =  Enumerable.Range(1, 5).Select(index =>
-//        new WeatherForecast
-//        (
-//            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//            Random.Shared.Next(-20, 55),
-//            summaries[Random.Shared.Next(summaries.Length)]
-//        ))
-//        .ToArray();
-//    return forecast;
-//})
-//.WithName("GetWeatherForecast")
-//.WithOpenApi();
 
 app.Run();
+
+
+
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {

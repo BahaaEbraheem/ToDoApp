@@ -1,42 +1,46 @@
 ﻿using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
+using ToDoApp.Domain.Repositories;
 
 namespace ToDoApp.Application.Services;
 
 public class ToDoItemService : IToDoItemService
 {
-    private readonly List<ToDoItem> _toDoItems = new();
+    private readonly IToDoItemRepository _repository;
 
-    public IEnumerable<ToDoItem> GetAll()
+    public ToDoItemService(IToDoItemRepository toDoItemRepository)
     {
-        return _toDoItems;
+        _repository = toDoItemRepository;
     }
 
-    public ToDoItem Create(ToDoItem toDoItem)
+    public async Task<IEnumerable<ToDoItem>> GetAllAsync()
     {
-        toDoItem.Id = _toDoItems.Count + 1;
-        _toDoItems.Add(toDoItem);
-        return toDoItem;
+        return await _repository.GetAllAsync();
+    }
+    public async Task<ToDoItem> CreateAsync(ToDoItem toDoItem)
+    {
+        return await _repository.CreateAsync(toDoItem);
     }
 
-    public bool Update(int id, ToDoItem toDoItem)
+    public async Task<bool> UpdateAsync(int id, ToDoItem toDoItem)
     {
-        var item = _toDoItems.Find(i => i.Id == id);
-        if (item != null)
+        var existingItem = await _repository.GetByIdAsync(id);
+        if (existingItem != null)
         {
-            item.Title = toDoItem.Title;
-            item.IsCompleted = toDoItem.IsCompleted;
+            existingItem.Title = toDoItem.Title;
+            existingItem.IsCompleted = toDoItem.IsCompleted;
+            await _repository.UpdateAsync(existingItem);
             return true;
         }
         return false;
     }
 
-    public bool Delete(int id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var item = _toDoItems.Find(i => i.Id == id);
-        if (item != null)
+        var existingItem = await _repository.GetByIdAsync(id);
+        if (existingItem != null)
         {
-            _toDoItems.Remove(item);
+            await _repository.DeleteAsync(id);
             return true;
         }
         return false;

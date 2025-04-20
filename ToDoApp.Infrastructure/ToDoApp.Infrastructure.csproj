@@ -13,7 +13,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <ProjectReference Include="..\ToDoApp.Application\ToDoApp.Application.csproj" />
     <ProjectReference Include="..\ToDoApp.Domain\ToDoApp.Domain.csproj" />
   </ItemGroup>

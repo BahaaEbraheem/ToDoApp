@@ -23,7 +23,7 @@ namespace ToDoApp.API.Controllers
         [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
         public ActionResult<IEnumerable<ToDoItem>> Get()
         {
-            var items = _toDoItemService.GetAll();
+            var items = _toDoItemService.GetAllAsync();
             return Ok(items);
         }
 
@@ -33,7 +33,7 @@ namespace ToDoApp.API.Controllers
 
         public ActionResult<ToDoItem> Post([FromBody] ToDoItem toDoItem)
         {
-            var createdItem = _toDoItemService.Create(toDoItem);
+            var createdItem = _toDoItemService.CreateAsync(toDoItem);
             return CreatedAtAction(nameof(Get), new { id = createdItem.Id }, createdItem);
         }
 
@@ -41,9 +41,9 @@ namespace ToDoApp.API.Controllers
         [HttpPut("{id}")]
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه إضافة المهام
 
-        public IActionResult Put(int id, [FromBody] ToDoItem toDoItem)
+        public async Task<IActionResult> Put(int id, [FromBody] ToDoItem toDoItem)
         {
-            if (_toDoItemService.Update(id, toDoItem))
+            if (await _toDoItemService.UpdateAsync(id, toDoItem))
             {
                 return NoContent();
             }
@@ -54,9 +54,9 @@ namespace ToDoApp.API.Controllers
         [HttpDelete("{id}")]
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه حذف المهام
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
-            if (_toDoItemService.Delete(id))
+            if (await _toDoItemService.DeleteAsync(id))
             {
                 return NoContent();
             }
