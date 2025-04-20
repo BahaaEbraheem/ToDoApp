@@ -20,10 +20,10 @@ namespace ToDoApp.API.Controllers
 
         // GET: api/ToDoItems
         [HttpGet]
-        [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
-        public ActionResult<IEnumerable<ToDoItem>> Get()
+        [Authorize]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
+        public async Task<ActionResult<IEnumerable<ToDoItem>>> Get()
         {
-            var items = _toDoItemService.GetAllAsync();
+            var items = await _toDoItemService.GetAllAsync();
             return Ok(items);
         }
 

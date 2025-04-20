@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Application.Services;
 using ToDoApp.Domain.Entities;
@@ -27,25 +30,66 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-// Add Authentication with JWT Bearer Token
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.RequireHttpsMetadata = false; // Set to true in production
-        options.Authority = builder.Configuration["JwtSettings:Issuer"];
-        options.Audience = builder.Configuration["JwtSettings:Audience"];
-        options.SaveToken = true;
-    });
+
+
+var JwtSecretkey = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]);
+var tokenValidationParameters = new TokenValidationParameters
+{
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(JwtSecretkey),
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    RequireExpirationTime = false,
+    ValidateLifetime = true
+};
+builder.Services.AddSingleton(tokenValidationParameters);
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+})
+       .AddJwtBearer(x =>
+       {
+           x.RequireHttpsMetadata = false;
+           x.SaveToken = true;
+           x.TokenValidationParameters = tokenValidationParameters;
+
+       });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    builder.AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    );
+});
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.RequireHttpsMetadata = false;
+//        options.IncludeErrorDetails = true; // Set to false in production
+//        options.SaveToken = true;
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+
+//            ValidateIssuer = false,
+//            ValidateAudience = false,
+//            ValidateLifetime = false,
+//            ValidateIssuerSigningKey = false,
+//            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+//            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
+//        };
+//    });
 // Add services to the container.
 builder.Services.AddControllers();
 // Add Swagger services
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ToDo API", Version = "v1" });
-
-    // Add security definition for JWT Bearer token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -76,7 +120,14 @@ builder.Services.AddScoped<IToDoItemService, ToDoItemService>();
 builder.Services.AddScoped<IToDoItemRepository, ToDoItemRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+});
 
 
 
@@ -85,7 +136,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 var app = builder.Build();
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -95,9 +145,9 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDo API v1");
     });
 }
-app.UseRouting();
 app.UseHttpsRedirection();
-
+app.UseRouting();
+app.UseCors("CorsPolicy");
 // Enable Authentication and Authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();

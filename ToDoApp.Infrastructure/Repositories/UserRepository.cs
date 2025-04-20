@@ -26,6 +26,7 @@ namespace ToDoApp.Infrastructure.Repositories
             if (user != null && await _userManager.CheckPasswordAsync(user, password))
             {
                 return user;
+
             }
             return null;
         }
