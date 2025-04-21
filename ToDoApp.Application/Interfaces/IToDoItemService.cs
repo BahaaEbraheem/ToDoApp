@@ -13,5 +13,7 @@ namespace ToDoApp.Application.Interfaces
         Task<ToDoItem> CreateAsync(ToDoItem toDoItem);
         Task<bool> UpdateAsync(int id, ToDoItem toDoItem);
         Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<ToDoItem>> FilterAsync(string? searchQuery, string? priority, string? category, int pageIndex, int pageSize);
+
     }
 }

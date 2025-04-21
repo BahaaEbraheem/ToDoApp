@@ -18,12 +18,19 @@ namespace ToDoApp.API.Controllers
             _toDoItemService = toDoItemService;
         }
 
-        // GET: api/ToDoItems
+        //// GET: api/ToDoItems
+        //[HttpGet]
+        //[Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
+        //public async Task<ActionResult<IEnumerable<ToDoItem>>> Get()
+        //{
+        //    var items = await _toDoItemService.GetAllAsync();
+        //    return Ok(items);
+        //}
         [HttpGet]
-        [Authorize]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
-        public async Task<ActionResult<IEnumerable<ToDoItem>>> Get()
+        [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
+        public async Task<ActionResult<IEnumerable<ToDoItem>>> Get([FromQuery] string? searchQuery, [FromQuery] string? priority, [FromQuery] string? category, [FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
         {
-            var items = await _toDoItemService.GetAllAsync();
+            var items = await _toDoItemService.FilterAsync(searchQuery, priority, category, pageIndex, pageSize);
             return Ok(items);
         }
 

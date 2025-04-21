@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,10 +33,10 @@ builder.Services.AddEndpointsApiExplorer();
 
 
 
-var JwtSecretkey = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"]);
+var JwtSecretkey = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]);
 var tokenValidationParameters = new TokenValidationParameters
 {
-    ValidateIssuerSigningKey = true,
+    ValidateIssuerSigningKey = false,
     IssuerSigningKey = new SymmetricSecurityKey(JwtSecretkey),
     ValidateIssuer = false,
     ValidateAudience = false,
@@ -58,7 +58,11 @@ builder.Services.AddAuthentication(x =>
            x.TokenValidationParameters = tokenValidationParameters;
 
        });
-
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Owner", policy => policy.RequireRole("Owner"));
+    options.AddPolicy("Guest", policy => policy.RequireRole("Guest"));
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", builder =>
@@ -164,7 +168,6 @@ using (var scope = app.Services.CreateScope())
 app.MapControllers();
 
 app.Run();
-
 
 
 

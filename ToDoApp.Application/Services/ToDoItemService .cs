@@ -28,7 +28,11 @@ public class ToDoItemService : IToDoItemService
         if (existingItem != null)
         {
             existingItem.Title = toDoItem.Title;
+            existingItem.Description = toDoItem.Description;
+            existingItem.Priority = toDoItem.Priority;
+            existingItem.Category = toDoItem.Category;
             existingItem.IsCompleted = toDoItem.IsCompleted;
+            existingItem.CompletedAt = toDoItem.CompletedAt;
             await _repository.UpdateAsync(existingItem);
             return true;
         }
@@ -44,5 +48,26 @@ public class ToDoItemService : IToDoItemService
             return true;
         }
         return false;
+    }
+    public async Task<IEnumerable<ToDoItem>> FilterAsync(string? searchQuery, string? priority, string? category, int pageIndex, int pageSize)
+    {
+        var items = await _repository.GetAllAsync();
+
+        if (!string.IsNullOrEmpty(searchQuery))
+        {
+            items = items.Where(x => x.Title.Contains(searchQuery) || x.Description.Contains(searchQuery));
+        }
+
+        if (!string.IsNullOrEmpty(priority))
+        {
+            items = items.Where(x => x.Priority.ToString() == priority);
+        }
+
+        if (!string.IsNullOrEmpty(category))
+        {
+            items = items.Where(x => x.Category == category);
+        }
+
+        return items.Skip(pageIndex * pageSize).Take(pageSize).ToList();
     }
 }
