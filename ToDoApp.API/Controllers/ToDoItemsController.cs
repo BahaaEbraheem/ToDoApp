@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
 
@@ -27,6 +28,16 @@ namespace ToDoApp.API.Controllers
             var items = await _toDoItemService.FilterAsync(searchQuery, priority, category, pageIndex, pageSize);
             return Ok(items);
         }
+        // GET: api/ToDoItems/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ToDoItem>> GetToDoItem(Guid id)
+        {
+            var item = await _toDoItemService.GetById(id);
+            if (item == null) return NotFound();
+            return item;
+        }
+
+
 
         // POST: api/ToDoItems
         [HttpPost]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,6 @@ namespace ToDoApp.Application.Interfaces
         bool UpdateAsync(Guid id, ToDoItem toDoItem);
         bool DeleteAsync(Guid id);
         Task<IEnumerable<ToDoItem>> FilterAsync(string? searchQuery, string? priority, string? category, int pageIndex, int pageSize);
-
+        Task<ActionResult<ToDoItem>> GetById(Guid id);
     }
 }

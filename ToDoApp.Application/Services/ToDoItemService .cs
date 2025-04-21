@@ -1,4 +1,6 @@
-﻿using ToDoApp.Application.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
 using ToDoApp.Domain.Repositories;
 
@@ -69,5 +71,10 @@ public class ToDoItemService : IToDoItemService
         }
 
         return items.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+    }
+
+    public async Task<ActionResult<ToDoItem>> GetById(Guid id)
+    {
+        return await _repository.FindAsync(id);
     }
 }

@@ -53,6 +53,11 @@ namespace ToDoApp.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<ToDoItem?> FindAsync(Guid id)
+        { 
+            var workItem = await _context.ToDoItems.FindAsync(id);
+            return workItem;
+        }
     }
 
 }
