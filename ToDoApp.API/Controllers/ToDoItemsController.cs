@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
 
@@ -23,10 +24,17 @@ namespace ToDoApp.API.Controllers
         [HttpGet]
         [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
         [Authorize(Policy = "CanViewTasks")]
-        public async Task<ActionResult<IEnumerable<ToDoItem>>> Get([FromQuery] string? searchQuery, [FromQuery] string? priority, [FromQuery] string? category, [FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<ToDoItem>>> Get(
+                [FromQuery] string? keyword,
+    [FromQuery] string? category,
+    [FromQuery] string? priority,
+    [FromQuery] bool? isCompleted,
+    [FromQuery] string? sortBy = "CreatedAt",
+    [FromQuery] bool isDesc = false,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10)
         {
-            var items = await _toDoItemService.FilterAsync(searchQuery, priority, category, pageIndex, pageSize);
-            return Ok(items);
+            return await _toDoItemService.FilterAsync(keyword, category, priority, isCompleted, sortBy, isDesc, page, pageSize);
         }
         // GET: api/ToDoItems/{id}
         [HttpGet("{id}")]
@@ -37,7 +45,13 @@ namespace ToDoApp.API.Controllers
             return item;
         }
 
-
+        [HttpPatch("{id}/complete")]
+        public async Task<IActionResult> SetCompletionStatus(Guid id, [FromQuery] bool isCompleted)
+        {
+            var result = await _toDoItemService.SetCompletedStatusAsync(id, isCompleted);
+            if (!result) return NotFound();
+            return Ok();
+        }
 
         // POST: api/ToDoItems
         [HttpPost]
