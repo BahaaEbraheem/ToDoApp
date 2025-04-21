@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using ToDoApp.Application.Dtos;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
 using ToDoApp.Infrastructure.Data;
@@ -65,10 +66,10 @@ public class ToDoSeedData
 
             if (!todoService.GetAllAsync().Result.Any())
             {
-                var defaultItems = new List<ToDoItem>
+                var defaultItems = new List<ToDoItemCreateDto>
                 {
-                    new ToDoItem { Title = "Test Task 1", Description = "Description for test task 1", IsCompleted = false, CreatedAt = DateTime.Now , Priority = "عالية", Category = "إدارية"  },
-                    new ToDoItem { Title = "Test Task 2", Description = "Description for test task 2", IsCompleted = false, CreatedAt = DateTime.Now ,Priority = "متوسطة", Category = "مالية" }
+                    new ToDoItemCreateDto { Title = "Test Task 1", Description = "Description for test task 1",  CreatedAt = DateTime.Now , Priority = "عالية", Category = "إدارية"  },
+                    new ToDoItemCreateDto { Title = "Test Task 2", Description = "Description for test task 2",  CreatedAt = DateTime.Now ,Priority = "متوسطة", Category = "مالية" }
                 };
 
                 foreach (var item in defaultItems)

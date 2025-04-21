@@ -18,7 +18,10 @@ namespace ToDoApp.Infrastructure.Repositories
         {
             _context = context;
         }
-
+        public  IQueryable<ToDoItem> QueryAll()
+        {
+            return  _context.ToDoItems.AsQueryable();
+        }
         public async Task<IEnumerable<ToDoItem>> GetAllAsync()
         {
             return await _context.ToDoItems.ToListAsync();

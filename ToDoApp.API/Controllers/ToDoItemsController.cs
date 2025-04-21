@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using ToDoApp.Application.Dtos;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
 
@@ -15,17 +17,19 @@ namespace ToDoApp.API.Controllers
     {
         private readonly IToDoItemService _toDoItemService;
         private readonly ILogger<ToDoItemsController> _logger;
-        public ToDoItemsController(IToDoItemService toDoItemService, ILogger<ToDoItemsController> logger)
+        private readonly IMapper _mapper;
+        public ToDoItemsController(IToDoItemService toDoItemService, ILogger<ToDoItemsController> logger, IMapper mapper)
         {
             _logger= logger;
             _toDoItemService = toDoItemService;
+            _mapper= mapper;
         }
 
      
         [HttpGet]
         [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
         [Authorize(Policy = "CanViewTasks")]
-        public async Task<ActionResult<IEnumerable<ToDoItem>>> Get(
+        public async Task<ActionResult<IEnumerable<ToDoItemDto>>> Get(
                 [FromQuery] string? keyword,
     [FromQuery] string? category,
     [FromQuery] string? priority,
@@ -38,12 +42,21 @@ namespace ToDoApp.API.Controllers
             try
             {
                 _logger.LogInformation("API call to fetch ToDo items.");
-                return await _toDoItemService.FilterAsync(keyword, category, priority, isCompleted, sortBy, isDesc, page, pageSize);
+
+                var items = await _toDoItemService.FilterAsync(keyword, category, priority, isCompleted, sortBy, isDesc, page, pageSize);
+
+                if (items.Value == null || !items.Value.Any())
+                {
+                    return NoContent();
+                }
+
+                var result = _mapper.Map<IEnumerable<ToDoItemDto>>(items.Value);
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching ToDo items with filters: Keyword = {Keyword}, Category = {Category}, Priority = {Priority}, IsCompleted = {IsCompleted}", keyword, category, priority, isCompleted);
-                throw; // إعادة رمي الاستثناء ليتم التعامل معه في Middleware
+                return StatusCode(500, "Internal server error");
             }
         }
         // GET: api/ToDoItems/{id}
@@ -102,7 +115,7 @@ namespace ToDoApp.API.Controllers
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه إضافة المهام
         [Authorize(Policy = "CanCreateTasks")]
 
-        public ActionResult<ToDoItem> Post([FromBody] ToDoItem toDoItem)
+        public ActionResult<ToDoItem> Post([FromBody] ToDoItemCreateDto toDoItem)
         {
             try
             {
@@ -123,7 +136,7 @@ namespace ToDoApp.API.Controllers
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه إضافة المهام
         [Authorize(Policy = "CanEditTasks")]
 
-        public async Task<IActionResult> Put(Guid id, [FromBody] ToDoItem toDoItem)
+        public async Task<IActionResult> Put(Guid id, [FromBody] ToDoItemUpdateDto toDoItem)
         {
             try
             {

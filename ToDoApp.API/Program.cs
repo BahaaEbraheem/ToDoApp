@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using ToDoApp.API;
 using ToDoApp.Application.Interfaces;
+using ToDoApp.Application.Mappings;
 using ToDoApp.Application.Services;
 using ToDoApp.Domain.Entities;
 using ToDoApp.Domain.Repositories;
@@ -26,7 +27,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
+// Register AutoMapper
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
