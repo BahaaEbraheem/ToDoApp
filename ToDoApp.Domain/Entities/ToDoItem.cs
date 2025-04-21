@@ -1,4 +1,6 @@
-﻿namespace ToDoApp.Domain.Entities;
+﻿using System.Text.Json.Serialization;
+
+namespace ToDoApp.Domain.Entities;
 
 public class ToDoItem
 {

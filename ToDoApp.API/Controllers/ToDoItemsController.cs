@@ -18,16 +18,10 @@ namespace ToDoApp.API.Controllers
             _toDoItemService = toDoItemService;
         }
 
-        //// GET: api/ToDoItems
-        //[HttpGet]
-        //[Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
-        //public async Task<ActionResult<IEnumerable<ToDoItem>>> Get()
-        //{
-        //    var items = await _toDoItemService.GetAllAsync();
-        //    return Ok(items);
-        //}
+     
         [HttpGet]
         [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
+        [Authorize(Policy = "CanViewTasks")]
         public async Task<ActionResult<IEnumerable<ToDoItem>>> Get([FromQuery] string? searchQuery, [FromQuery] string? priority, [FromQuery] string? category, [FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
         {
             var items = await _toDoItemService.FilterAsync(searchQuery, priority, category, pageIndex, pageSize);
@@ -37,6 +31,7 @@ namespace ToDoApp.API.Controllers
         // POST: api/ToDoItems
         [HttpPost]
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه إضافة المهام
+        [Authorize(Policy = "CanCreateTasks")]
 
         public ActionResult<ToDoItem> Post([FromBody] ToDoItem toDoItem)
         {
@@ -47,12 +42,13 @@ namespace ToDoApp.API.Controllers
         // PUT: api/ToDoItems/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه إضافة المهام
+        [Authorize(Policy = "CanEditTasks")]
 
-        public async Task<IActionResult> Put(int id, [FromBody] ToDoItem toDoItem)
+        public async Task<IActionResult> Put(Guid id, [FromBody] ToDoItem toDoItem)
         {
-            if (await _toDoItemService.UpdateAsync(id, toDoItem))
+            if ( _toDoItemService.UpdateAsync(id, toDoItem))
             {
-                return NoContent();
+                return Ok();
             }
             return NotFound();
         }
@@ -60,10 +56,11 @@ namespace ToDoApp.API.Controllers
         // DELETE: api/ToDoItems/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه حذف المهام
+        [Authorize(Policy = "CanDeleteTasks")]
 
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<IActionResult> DeleteAsync(Guid id)
         {
-            if (await _toDoItemService.DeleteAsync(id))
+            if ( _toDoItemService.DeleteAsync(id))
             {
                 return NoContent();
             }

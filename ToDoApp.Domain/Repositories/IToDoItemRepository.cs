@@ -10,9 +10,9 @@ namespace ToDoApp.Domain.Repositories
     public interface IToDoItemRepository
     {
         Task<IEnumerable<ToDoItem>> GetAllAsync();
-        Task<ToDoItem> GetByIdAsync(int id);
-        Task<ToDoItem> CreateAsync(ToDoItem toDoItem);
-        Task<ToDoItem> UpdateAsync(ToDoItem toDoItem);
-        Task DeleteAsync(int id);
+        ToDoItem GetByIdAsync(Guid id);
+        ToDoItem CreateAsync(ToDoItem toDoItem);
+        ToDoItem UpdateAsync(ToDoItem toDoItem);
+        Task DeleteAsync(Guid id);
     }
 }

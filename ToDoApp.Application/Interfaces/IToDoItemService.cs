@@ -10,9 +10,9 @@ namespace ToDoApp.Application.Interfaces
     public interface IToDoItemService
     {
         Task<IEnumerable<ToDoItem>> GetAllAsync();
-        Task<ToDoItem> CreateAsync(ToDoItem toDoItem);
-        Task<bool> UpdateAsync(int id, ToDoItem toDoItem);
-        Task<bool> DeleteAsync(int id);
+        ToDoItem CreateAsync(ToDoItem toDoItem);
+        bool UpdateAsync(Guid id, ToDoItem toDoItem);
+        bool DeleteAsync(Guid id);
         Task<IEnumerable<ToDoItem>> FilterAsync(string? searchQuery, string? priority, string? category, int pageIndex, int pageSize);
 
     }

@@ -55,15 +55,27 @@ namespace ToDoApp.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _userRepository.AuthenticateAsync(model.Username, model.Password);
+            //var user = await _userRepository.AuthenticateAsync(model.Username, model.Password);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
                 return Unauthorized(new { Message = "Invalid credentials" });
 
-            var claims = new[]
-               {
-                new Claim(ClaimTypes.Name, model.Username),
-                new Claim(ClaimTypes.Role, user.Role),
-            };
+            // الحصول على الأدوار الخاصة بالمستخدم
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // إعداد الـ Claims
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, model.Email),
+            new Claim(ClaimTypes.Email, model.Email)
+        };
+
+            // إضافة الأدوار إلى الـ Token
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -84,7 +96,7 @@ namespace ToDoApp.API.Controllers
 
     public class LoginModel
     {
-        public string Username { get; set; }
+        public string Email { get; set; }
         public string Password { get; set; }
     }
     public class RegisterModel

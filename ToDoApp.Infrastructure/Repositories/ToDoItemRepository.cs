@@ -24,26 +24,27 @@ namespace ToDoApp.Infrastructure.Repositories
             return await _context.ToDoItems.ToListAsync();
         }
 
-        public async Task<ToDoItem> GetByIdAsync(int id)
+        public ToDoItem GetByIdAsync(Guid id)
         {
-            return await _context.ToDoItems.FindAsync(id);
+            return _context.ToDoItems.Find(id);
         }
 
-        public async Task<ToDoItem> CreateAsync(ToDoItem toDoItem)
+        public  ToDoItem CreateAsync(ToDoItem toDoItem)
         {
             _context.ToDoItems.Add(toDoItem);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
             return toDoItem;
         }
 
-        public async Task<ToDoItem> UpdateAsync(ToDoItem toDoItem)
+        public ToDoItem UpdateAsync(ToDoItem toDoItem)
         {
+
             _context.ToDoItems.Update(toDoItem);
-            await _context.SaveChangesAsync();
+            _context.SaveChangesAsync();
             return toDoItem;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var toDoItem = await _context.ToDoItems.FindAsync(id);
             if (toDoItem != null)

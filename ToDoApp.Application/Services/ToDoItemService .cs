@@ -17,14 +17,14 @@ public class ToDoItemService : IToDoItemService
     {
         return await _repository.GetAllAsync();
     }
-    public async Task<ToDoItem> CreateAsync(ToDoItem toDoItem)
+    public ToDoItem CreateAsync(ToDoItem toDoItem)
     {
-        return await _repository.CreateAsync(toDoItem);
+        return  _repository.CreateAsync(toDoItem);
     }
 
-    public async Task<bool> UpdateAsync(int id, ToDoItem toDoItem)
+    public  bool UpdateAsync(Guid id, ToDoItem toDoItem)
     {
-        var existingItem = await _repository.GetByIdAsync(id);
+        var existingItem =  _repository.GetByIdAsync(id);
         if (existingItem != null)
         {
             existingItem.Title = toDoItem.Title;
@@ -33,18 +33,18 @@ public class ToDoItemService : IToDoItemService
             existingItem.Category = toDoItem.Category;
             existingItem.IsCompleted = toDoItem.IsCompleted;
             existingItem.CompletedAt = toDoItem.CompletedAt;
-            await _repository.UpdateAsync(existingItem);
+            _repository.UpdateAsync(existingItem);
             return true;
         }
         return false;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public  bool DeleteAsync(Guid id)
     {
-        var existingItem = await _repository.GetByIdAsync(id);
+        var existingItem =  _repository.GetByIdAsync(id);
         if (existingItem != null)
         {
-            await _repository.DeleteAsync(id);
+             _repository.DeleteAsync(id);
             return true;
         }
         return false;

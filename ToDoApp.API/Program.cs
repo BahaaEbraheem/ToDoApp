@@ -66,6 +66,24 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Owner", policy => policy.RequireRole("Owner"));
     options.AddPolicy("Guest", policy => policy.RequireRole("Guest"));
 });
+
+// إضافة خدمات التفويض مع سياسات الأدوار
+builder.Services.AddAuthorization(options =>
+{
+    // سياسة Owner: يمكنه دعوة مستخدمين آخرين إلى المنصة
+    options.AddPolicy("CanInviteUsers", policy => policy.RequireRole("Owner"));
+
+    // سياسة Guest: صلاحيات محدودة مثل عرض المهام فقط
+    options.AddPolicy("CanViewTasks", policy => policy.RequireRole("Guest", "Owner"));
+    options.AddPolicy("CanEditTasks", policy => policy.RequireRole("Owner"));
+    options.AddPolicy("CanDeleteTasks", policy => policy.RequireRole("Owner"));
+    options.AddPolicy("CanCreateTasks", policy => policy.RequireRole( "Owner"));
+});
+
+
+
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", builder =>

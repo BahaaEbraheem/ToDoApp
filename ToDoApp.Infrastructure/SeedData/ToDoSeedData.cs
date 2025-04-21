@@ -73,7 +73,7 @@ public class ToDoSeedData
 
                 foreach (var item in defaultItems)
                 {
-                  await  todoService.CreateAsync(item);  // استخدام خدمة المهام لإنشاء المهام في قاعدة البيانات
+                   todoService.CreateAsync(item);  // استخدام خدمة المهام لإنشاء المهام في قاعدة البيانات
                 }
             
             }
