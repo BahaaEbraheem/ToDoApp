@@ -38,10 +38,12 @@ var tokenValidationParameters = new TokenValidationParameters
 {
     ValidateIssuerSigningKey = false,
     IssuerSigningKey = new SymmetricSecurityKey(JwtSecretkey),
-    ValidateIssuer = false,
-    ValidateAudience = false,
+    ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+    ValidAudience = builder.Configuration["JwtSettings:Audience"],
+    ValidateIssuer = true,
+    ValidateAudience = true,
     RequireExpirationTime = false,
-    ValidateLifetime = true
+    ValidateLifetime = false
 };
 builder.Services.AddSingleton(tokenValidationParameters);
 builder.Services.AddAuthentication(x =>
