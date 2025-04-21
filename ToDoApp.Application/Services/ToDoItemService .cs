@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
 using ToDoApp.Domain.Repositories;
@@ -10,14 +11,17 @@ namespace ToDoApp.Application.Services;
 public class ToDoItemService : IToDoItemService
 {
     private readonly IToDoItemRepository _repository;
-
-    public ToDoItemService(IToDoItemRepository toDoItemRepository)
+    private readonly ILogger<ToDoItemService> _logger;
+    public ToDoItemService(IToDoItemRepository toDoItemRepository, ILogger<ToDoItemService> logger)
     {
         _repository = toDoItemRepository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<ToDoItem>> GetAllAsync()
     {
+        _logger.LogInformation("Fetching all ToDo items.");
+
         return await _repository.GetAllAsync();
     }
     public ToDoItem CreateAsync(ToDoItem toDoItem)

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using ToDoApp.API;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Application.Services;
 using ToDoApp.Domain.Entities;
@@ -153,6 +154,8 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDo API v1");
     });
 }
+app.UseMiddleware<ErrorHandlingMiddleware>(); // إضافة Middleware الخاص بالأخطاء
+
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("CorsPolicy");
