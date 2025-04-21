@@ -38,6 +38,8 @@ namespace ToDoApp.API.Controllers
         }
         // GET: api/ToDoItems/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
+        [Authorize(Policy = "CanViewTasks")]
         public async Task<ActionResult<ToDoItem>> GetToDoItem(Guid id)
         {
             var item = await _toDoItemService.GetById(id);
@@ -46,6 +48,8 @@ namespace ToDoApp.API.Controllers
         }
 
         [HttpPatch("{id}/complete")]
+        [Authorize(Roles = "Owner")]
+        [Authorize(Policy = "CanEditTasks")]
         public async Task<IActionResult> SetCompletionStatus(Guid id, [FromQuery] bool isCompleted)
         {
             var result = await _toDoItemService.SetCompletedStatusAsync(id, isCompleted);
