@@ -9,6 +9,8 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
   </PropertyGroup>
   
   

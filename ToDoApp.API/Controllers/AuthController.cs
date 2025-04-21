@@ -72,7 +72,6 @@ namespace ToDoApp.API.Controllers
                 audience: _configuration["JwtSettings:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:ExpiryMinutes"])),
-
                 signingCredentials: creds
             );
 

@@ -1,21 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ToDoApp.API;
 
 namespace ToDoApp.Tests.IntegrationTests;
 
-public class ToDoItemsControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class ToDoItemsControllerTests : IClassFixture<WebApplicationFactory<StartupMarker>>
 {
     private readonly HttpClient _client;
-    private readonly WebApplicationFactory<Program> _factory;
-    public ToDoItemsControllerTests(WebApplicationFactory<Program> factory)
+    private readonly IConfiguration _configuration;
+    private readonly WebApplicationFactory<StartupMarker> _factory;
+    public ToDoItemsControllerTests(WebApplicationFactory<StartupMarker> factory)
     {
         _factory = factory;
         _client = factory.CreateClient();
+        _configuration = factory.Services.GetService<IConfiguration>()!;
     }
     private string GenerateJwtToken(string role)
     {
@@ -25,12 +29,16 @@ public class ToDoItemsControllerTests : IClassFixture<WebApplicationFactory<Prog
                 new Claim(ClaimTypes.Role, role),
             };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("supersecretkeythatisatleast128bitslong"));
+        //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("supersecretkeythatisatleast128bitslong"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(
-              claims: claims,
+            issuer: _configuration["JwtSettings:Issuer"],
+            audience: _configuration["JwtSettings:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:ExpiryMinutes"])),
             signingCredentials: creds
-        );
+    );
 
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -54,7 +62,7 @@ public class ToDoItemsControllerTests : IClassFixture<WebApplicationFactory<Prog
     public async Task Get_ToDoItems_WithGuestRole_ReturnsOk()
     {
         // محاكاة JWT مع دور "Guest"
-        var token = "Guest_JWT_Token"; // استبدل هذا بقيم حقيقية
+        var token = GenerateJwtToken("Owner");
         _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         var response = await _client.GetAsync("/api/ToDoItems");
@@ -76,7 +84,7 @@ public class ToDoItemsControllerTests : IClassFixture<WebApplicationFactory<Prog
     public async Task Get_ToDoItems_WithInvalidRole_ReturnsForbidden()
     {
         // محاكاة JWT مع دور غير مصرح به
-        var token = "InvalidRole_JWT_Token"; // استبدل هذا بقيم حقيقية
+        var token = GenerateJwtToken("User");
         _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         var response = await _client.GetAsync("/api/ToDoItems");
