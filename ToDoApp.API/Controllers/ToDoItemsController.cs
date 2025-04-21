@@ -62,7 +62,7 @@ namespace ToDoApp.API.Controllers
         {
             if ( _toDoItemService.DeleteAsync(id))
             {
-                return NoContent();
+                return Ok();
             }
             return NotFound();
         }
