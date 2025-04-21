@@ -69,7 +69,8 @@ public class ToDoSeedData
                 var defaultItems = new List<ToDoItemCreateDto>
                 {
                     new ToDoItemCreateDto { Title = "Test Task 1", Description = "Description for test task 1",  CreatedAt = DateTime.Now , Priority = "عالية", Category = "إدارية"  },
-                    new ToDoItemCreateDto { Title = "Test Task 2", Description = "Description for test task 2",  CreatedAt = DateTime.Now ,Priority = "متوسطة", Category = "مالية" }
+                    new ToDoItemCreateDto { Title = "Test Task 2", Description = "Description for test task 2",  CreatedAt = DateTime.Now ,Priority = "متوسطة", Category = "مالية" },
+                    new ToDoItemCreateDto { Title = "Test Task 3", Description = "Description for test task 3",  CreatedAt = DateTime.Now ,Priority = "منخفضة", Category = "حاسوبية" }
                 };
 
                 foreach (var item in defaultItems)

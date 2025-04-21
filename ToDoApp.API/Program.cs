@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ using ToDoApp.API;
 using ToDoApp.Application.Interfaces;
 using ToDoApp.Application.Mappings;
 using ToDoApp.Application.Services;
+using ToDoApp.Application.Validators;
 using ToDoApp.Domain.Entities;
 using ToDoApp.Domain.Repositories;
 using ToDoApp.Infrastructure.Data;
@@ -97,7 +99,13 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+       .AddFluentValidation(fv =>
+       {
+           fv.RegisterValidatorsFromAssemblyContaining<ToDoItemDtoValidator>();
+           fv.RegisterValidatorsFromAssemblyContaining<CreateToDoItemDtoValidator>();
+           fv.RegisterValidatorsFromAssemblyContaining<UpdateToDoItemDtoValidator>();
+       }); 
 // Add Swagger services
 builder.Services.AddSwaggerGen(c =>
 {

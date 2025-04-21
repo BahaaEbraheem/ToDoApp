@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using ToDoApp.Application.Dtos;
 using ToDoApp.Application.Interfaces;
+using ToDoApp.Application.Validators;
 using ToDoApp.Domain.Entities;
 
 namespace ToDoApp.API.Controllers
@@ -18,11 +19,16 @@ namespace ToDoApp.API.Controllers
         private readonly IToDoItemService _toDoItemService;
         private readonly ILogger<ToDoItemsController> _logger;
         private readonly IMapper _mapper;
-        public ToDoItemsController(IToDoItemService toDoItemService, ILogger<ToDoItemsController> logger, IMapper mapper)
+        private readonly CreateToDoItemDtoValidator _createValidator;
+        private readonly UpdateToDoItemDtoValidator _updateValidator;
+        public ToDoItemsController(IToDoItemService toDoItemService, ILogger<ToDoItemsController> logger,
+            IMapper mapper, CreateToDoItemDtoValidator createValidator , UpdateToDoItemDtoValidator updateValidator)
         {
-            _logger= logger;
+            _updateValidator = updateValidator;
+            _logger = logger;
             _toDoItemService = toDoItemService;
             _mapper= mapper;
+            _createValidator = createValidator;
         }
 
      
@@ -115,11 +121,19 @@ namespace ToDoApp.API.Controllers
         [Authorize(Roles = "Owner")]  // فقط Owner يمكنه إضافة المهام
         [Authorize(Policy = "CanCreateTasks")]
 
-        public ActionResult<ToDoItem> Post([FromBody] ToDoItemCreateDto toDoItem)
+        public async Task<ActionResult<ToDoItem>> Post([FromBody] ToDoItemCreateDto createToDoItemDto)
         {
             try
             {
-                var createdItem = _toDoItemService.CreateAsync(toDoItem);
+                // Validate the DTO asynchronously
+                var validationResult =await  _createValidator.ValidateAsync(createToDoItemDto);
+
+                if (!validationResult.IsValid)
+                {
+                    // Return validation errors if not valid
+                    return BadRequest(validationResult.Errors);
+                }
+                var createdItem = _toDoItemService.CreateAsync(createToDoItemDto);
                 return CreatedAtAction(nameof(Get), new { id = createdItem.Id }, createdItem);
             }
             catch (Exception ex)
@@ -140,6 +154,14 @@ namespace ToDoApp.API.Controllers
         {
             try
             {
+                // Validate the DTO asynchronously
+                var validationResult = await _updateValidator.ValidateAsync(toDoItem);
+
+                if (!validationResult.IsValid)
+                {
+                    // Return validation errors if not valid
+                    return BadRequest(validationResult.Errors);
+                }
                 var result = _toDoItemService.UpdateAsync(id, toDoItem);
                 if (!result) return NotFound();
                 return Ok();
