@@ -36,14 +36,15 @@ builder.Services.AddEndpointsApiExplorer();
 var JwtSecretkey = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]);
 var tokenValidationParameters = new TokenValidationParameters
 {
-    ValidateIssuerSigningKey = false,
+    ValidateIssuerSigningKey = true,
     IssuerSigningKey = new SymmetricSecurityKey(JwtSecretkey),
     ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
     ValidAudience = builder.Configuration["JwtSettings:Audience"],
     ValidateIssuer = true,
     ValidateAudience = true,
-    RequireExpirationTime = false,
-    ValidateLifetime = false
+    RequireExpirationTime = true,
+    ValidateLifetime = true,
+    ClockSkew = TimeSpan.Zero // Strict expiration check
 };
 builder.Services.AddSingleton(tokenValidationParameters);
 builder.Services.AddAuthentication(x =>
@@ -73,24 +74,7 @@ builder.Services.AddCors(options =>
     .AllowAnyHeader()
     );
 });
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.RequireHttpsMetadata = false;
-//        options.IncludeErrorDetails = true; // Set to false in production
-//        options.SaveToken = true;
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
 
-//            ValidateIssuer = false,
-//            ValidateAudience = false,
-//            ValidateLifetime = false,
-//            ValidateIssuerSigningKey = false,
-//            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-//            ValidAudience = builder.Configuration["JwtSettings:Audience"],
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
-//        };
-//    });
 // Add services to the container.
 builder.Services.AddControllers();
 // Add Swagger services
