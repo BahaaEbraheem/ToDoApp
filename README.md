@@ -10,11 +10,13 @@ This project is a custom API for managing daily tasks (To-Do Lists), built using
 - Docker (if you want to run the environment using Docker Compose)
 
 ## Key Features:
-- Task management (add, edit, delete, browse).
+- Task management (add, edit, delete, browse). And check if title exist in database before on Create And Update.
+- Users and roles have been added in addition to three primary tasks within SeedData.
+- Use Auto Mapper and Fluent Validation (CreateToDoItemDtoValidator, ToDoItemDtoValidator, UpdateToDoItemDtoValidator ).
 - Mark tasks as "complete" or "incomplete".
 - Filtering, searching, and sorting support.
 - Pagination support.
-- Role support: **Owner** and **Guest**.
+- Role support: **Owner** and **Guest**. with polices (CanViewTasks, CanEditTasks, CanDeleteTasks, CanCreateTasks).
 - **Swagger UI** for API testing.
 - Advanced authentication using **JWT**.
 
@@ -47,6 +49,8 @@ docker-compose up
 - You can use **Postman** or **Swagger UI** to test the API:
 - **Swagger UI** will be available when the project is run on `https://localhost:7112/swagger/index.html`.
 - **Postman Collection** is available in the following path: `https://github.com/BahaaEbraheem/ToDoApp/blob/master/postman/Elkood_ToDoListAPI.postman_collection.json`.
+- **Postman Collection** is available in the following path: `https://github.com/BahaaEbraheem/ToDoApp/blob/master/postman/ Elkood.postman_test_run.json`.
+- All tested AIPs correctly and I put the test link here for you to run after adding the token but pay attention to the token expiration time
 
 ## Technologies and Tools Used:
 - **ASP.NET Core Web API**
