@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  todoapp-api:
+    build:
+      context: .
+      dockerfile: ToDoApp.API/Dockerfile
+    ports:
+      - "7112:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Elkood_ToDoAppDb;User Id=sa;password=P@ssw0rd;MultipleActiveResultSets=true;TrustServerCertificate=True
+    depends_on:
+      - sqlserver
+    networks:
+      - todoapp-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "P@ssw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1455:1433"
+    networks:
+      - todoapp-network
+
+networks:
+  todoapp-network:
+    driver: bridge

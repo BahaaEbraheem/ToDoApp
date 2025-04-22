@@ -31,40 +31,78 @@ namespace ToDoApp.API.Controllers
             _createValidator = createValidator;
         }
 
-     
+
         [HttpGet]
-        [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)
+        [Authorize(Roles = "Owner,Guest")]
         [Authorize(Policy = "CanViewTasks")]
-        public async Task<ActionResult<IEnumerable<ToDoItemDto>>> Get(
-                [FromQuery] string? keyword,
-    [FromQuery] string? category,
-    [FromQuery] string? priority,
-    [FromQuery] bool? isCompleted,
-    [FromQuery] string? sortBy = "CreatedAt",
-    [FromQuery] bool isDesc = false,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<PagedResult<ToDoItemDto>>> Get([FromQuery] GetToDoItemListFilter filter)
         {
             try
             {
                 _logger.LogInformation("API call to fetch ToDo items.");
 
-                var items = await _toDoItemService.FilterAsync(keyword, category, priority, isCompleted, sortBy, isDesc, page, pageSize);
-
-                if (items.Value == null || !items.Value.Any())
+                // Ensure valid PageSize and PageNumber
+                if (filter.PageSize <= 0)
                 {
-                    return NoContent();
+                    filter.PageSize = 10;  // Default to 10 items per page
                 }
 
-                var result = _mapper.Map<IEnumerable<ToDoItemDto>>(items.Value);
-                return Ok(result);
+                if (filter.PageNumber <= 0)
+                {
+                    filter.PageNumber = 1; // Default to first page if PageNumber is invalid
+                }
+
+                // Fetch the total count first (this is typically done in your service)
+                var totalCount = await _toDoItemService.GetTotalCountAsync(
+                    filter.qyerySearch,
+                    filter.Title,
+                    filter.Category,
+                    filter.Priority,
+                    filter.IsCompleted
+                );
+                Console.WriteLine("totalCount "+totalCount);
+                // Calculate total number of pages
+                int totalPages = (int)Math.Ceiling((double)totalCount / filter.PageSize);
+                Console.WriteLine("totalPages " + totalPages);
+                Console.WriteLine("filter.PageNumber " + filter.PageNumber);
+
+                // If the page number exceeds the total number of pages, set it to the last page
+                if (filter.PageNumber != totalPages && totalPages > 0)
+                {
+                    filter.PageNumber = totalPages;
+                }
+
+                // Now fetch the data for the current page
+                var pagedResult = await _toDoItemService.FilterAsync(
+                    filter.qyerySearch,
+                    filter.Title,
+                    filter.Category,
+                    filter.Priority,
+                    filter.IsCompleted,
+                    filter.SortBy,
+                    filter.IsDesc,
+                    filter.PageNumber,
+                    filter.PageSize
+                );
+
+                // Return a PagedResult including the total count and page info
+                return Ok(new PagedResult<ToDoItemDto>
+                {
+                    Items = pagedResult.Items,
+                    TotalCount = totalCount,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize
+                });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching ToDo items with filters: Keyword = {Keyword}, Category = {Category}, Priority = {Priority}, IsCompleted = {IsCompleted}", keyword, category, priority, isCompleted);
+                _logger.LogError(ex,
+                    "Error fetching ToDo items with filters: Title = {Title}, Category = {Category}, Priority = {Priority}, IsCompleted = {IsCompleted}",
+                    filter.Title, filter.Category, filter.Priority, filter.IsCompleted);
                 return StatusCode(500, "Internal server error");
             }
         }
+
         // GET: api/ToDoItems/{id}
         [HttpGet("{id}")]
         [Authorize(Roles = "Owner,Guest")]  // يمكن الوصول إليه من قبل الجميع (Owner و Guest)

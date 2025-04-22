@@ -20,6 +20,8 @@ public class ToDoSeedData
             string[] roles = { "Owner", "Guest" };
             foreach (var role in roles)
             {
+                Console.WriteLine($"RoleManager exists: {serviceProvider.GetService<RoleManager<IdentityRole>>() != null}");
+
                 var roleExist = await roleManager.RoleExistsAsync(role);
                 if (!roleExist)
                 {

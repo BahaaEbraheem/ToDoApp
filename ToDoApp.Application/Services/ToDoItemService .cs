@@ -7,6 +7,7 @@ using ToDoApp.Application.Interfaces;
 using ToDoApp.Domain.Entities;
 using ToDoApp.Domain.Repositories;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace ToDoApp.Application.Services;
 
@@ -104,47 +105,143 @@ public class ToDoItemService : IToDoItemService
             throw new ApplicationException($"An error occurred while deleting the ToDo item with ID: {id}.", ex);
         }
     }
-    public async Task<ActionResult<IEnumerable<ToDoItemDto>>> FilterAsync(
-    string? keyword,
-    string? category,
-    string? priority,
-    bool? isCompleted,
-    string? sortBy = "CreatedAt",
-    bool isDesc = false,
-    int page = 1,
-    int pageSize = 10)
+    public async Task<int> GetTotalCountAsync(string? qyerySearch, string? title, string? category, string? priority, bool? isCompleted)
     {
-        _logger.LogInformation("Filtering ToDo items.");
-        try
+        var query = _repository.QueryAll();
+
+        if (!string.IsNullOrEmpty(qyerySearch))
         {
-            // Fetch all items and apply filtering
-            var query = _repository.QueryAll();
-
-            if (!string.IsNullOrEmpty(keyword))
-                query = query.Where(t => t.Title.Contains(keyword) || t.Description.Contains(keyword));
-            if (!string.IsNullOrEmpty(category))
-                query = query.Where(t => t.Category == category);
-            if (!string.IsNullOrEmpty(priority))
-                query = query.Where(t => t.Priority == priority);
-            if (isCompleted.HasValue)
-                query = query.Where(t => t.IsCompleted == isCompleted);
-
-            query = sortBy switch
-            {
-                "Title" => isDesc ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title),
-                "Priority" => isDesc ? query.OrderByDescending(t => t.Priority) : query.OrderBy(t => t.Priority),
-                _ => isDesc ? query.OrderByDescending(t => t.CreatedAt) : query.OrderBy(t => t.CreatedAt)
-            };
-
-            var result = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-            return _mapper.Map<IEnumerable<ToDoItemDto>>(result).ToList();
+            query = query.Where(t =>
+                t.Title.Contains(qyerySearch) ||
+                t.Description.Contains(qyerySearch) ||
+                t.Category.Contains(qyerySearch) ||
+                t.Priority.Contains(qyerySearch));
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while filtering ToDo items.");
-            throw new ApplicationException("An error occurred while filtering the ToDo items.", ex);
-        }
+        if (!string.IsNullOrEmpty(title))
+            query = query.Where(x => x.Title.Contains(title));
+
+        if (!string.IsNullOrEmpty(category))
+            query = query.Where(x => x.Category.Contains(category));
+
+        if (!string.IsNullOrEmpty(priority))
+            query = query.Where(x => x.Priority.Contains(priority));
+
+        if (isCompleted.HasValue)
+            query = query.Where(x => x.IsCompleted == isCompleted.Value);
+
+        return await query.CountAsync();
     }
+    public async Task<PagedResult<ToDoItemDto>> FilterAsync(string? qyerySearch,string? title, string? category, string? priority, bool? isCompleted,
+                                                        string sortBy, bool isDesc, int pageNumber, int pageSize)
+    {
+        var query = _repository.QueryAll();
+
+        if (!string.IsNullOrEmpty(qyerySearch))
+        {
+            query = query.Where(t =>
+                t.Title.Contains(qyerySearch) ||
+                t.Description.Contains(qyerySearch) ||
+                t.Category.Contains(qyerySearch) ||
+                t.Priority.Contains(qyerySearch));
+        }
+        if (!string.IsNullOrEmpty(title))
+            query = query.Where(x => x.Title.Contains(title));
+
+        if (!string.IsNullOrEmpty(category))
+            query = query.Where(x => x.Category.Contains(category));
+
+        if (!string.IsNullOrEmpty(priority))
+            query = query.Where(x => x.Priority.Contains(priority));
+
+        if (isCompleted.HasValue)
+            query = query.Where(x => x.IsCompleted == isCompleted.Value);
+
+        if (sortBy == "CreatedAt")
+            query = isDesc ? query.OrderByDescending(x => x.CreatedAt) : query.OrderBy(x => x.CreatedAt);
+
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => new ToDoItemDto
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Category = x.Category,
+                Priority = x.Priority,
+                IsCompleted = x.IsCompleted,
+                CreatedAt = x.CreatedAt
+            })
+            .ToListAsync();
+
+        return new PagedResult<ToDoItemDto>
+        {
+            Items = items,
+            TotalCount = await GetTotalCountAsync(qyerySearch,title, category, priority, isCompleted),
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+    //public async Task<PagedResult<ToDoItemDto>> FilterAsync(
+    //    string? keyword,
+    //    string? category,
+    //    string? priority,
+    //    bool? isCompleted,
+    //    string? sortBy = "CreatedAt",
+    //    bool isDesc = false,
+    //    int page = 1,
+    //    int pageSize = 10)
+    //{
+    //    _logger.LogInformation("Filtering ToDo items.");
+    //    try
+    //    {
+    //        var query = _repository.QueryAll();
+
+    //        if (!string.IsNullOrEmpty(keyword))
+    //        {
+    //            query = query.Where(t =>
+    //                t.Title.Contains(keyword) ||
+    //                t.Description.Contains(keyword) ||
+    //                t.Category.Contains(keyword) ||
+    //                t.Priority.Contains(keyword));
+    //        }
+
+    //        if (!string.IsNullOrEmpty(category))
+    //            query = query.Where(t => t.Category == category);
+
+    //        if (!string.IsNullOrEmpty(priority))
+    //            query = query.Where(t => t.Priority == priority);
+
+    //        if (isCompleted.HasValue)
+    //            query = query.Where(t => t.IsCompleted == isCompleted);
+
+    //        var totalCount = await query.CountAsync(); // العدد الكلي قبل التقطيع
+
+    //        query = sortBy switch
+    //        {
+    //            "Title" => isDesc ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title),
+    //            "Priority" => isDesc ? query.OrderByDescending(t => t.Priority) : query.OrderBy(t => t.Priority),
+    //            _ => isDesc ? query.OrderByDescending(t => t.CreatedAt) : query.OrderBy(t => t.CreatedAt)
+    //        };
+
+    //        var result = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+    //        var dtoList = _mapper.Map<IEnumerable<ToDoItemDto>>(result);
+
+    //        return new PagedResult<ToDoItemDto>
+    //        {
+    //            Items = dtoList,
+    //            TotalCount = totalCount,
+    //            PageNumber = page,
+    //            PageSize = pageSize
+    //        };
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "Error occurred while filtering ToDo items.");
+    //        throw new ApplicationException("An error occurred while filtering the ToDo items.", ex);
+    //    }
+    //}
+
+
     public async Task<bool> SetCompletedStatusAsync(Guid id, bool isCompleted)
     {
         _logger.LogInformation($"Setting completed status for ToDo item with ID: {id}.");

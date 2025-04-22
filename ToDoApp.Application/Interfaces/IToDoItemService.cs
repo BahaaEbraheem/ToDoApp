@@ -15,8 +15,9 @@ namespace ToDoApp.Application.Interfaces
         ToDoItemDto CreateAsync(ToDoItemCreateDto toDoItem);
         bool UpdateAsync(Guid id, ToDoItemUpdateDto toDoItem);
         bool DeleteAsync(Guid id);
-        Task<ActionResult<IEnumerable<ToDoItemDto>>> FilterAsync(
-         string? keyword,
+        Task<PagedResult<ToDoItemDto>> FilterAsync(
+         string? querySearch,
+         string? title,
          string? category,
          string? priority,
          bool? isCompleted,
@@ -24,6 +25,9 @@ namespace ToDoApp.Application.Interfaces
          bool isDesc = false,
          int page = 1,
          int pageSize = 10);
+
+        Task<int> GetTotalCountAsync(string? querySearch, string? title, string? category, string? priority, bool? isCompleted);
+
         Task<ActionResult<ToDoItemDto>> GetById(Guid id);
         Task<bool> SetCompletedStatusAsync(Guid id, bool isCompleted);
 

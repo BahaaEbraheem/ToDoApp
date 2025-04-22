@@ -15,6 +15,7 @@ using ToDoApp.Domain.Entities;
 using ToDoApp.Domain.Repositories;
 using ToDoApp.Infrastructure.Data;
 using ToDoApp.Infrastructure.Repositories;
+using ToDoApp.Infrastructure.SeedData;
 using static ToDoApp.Infrastructure.SeedData.ToDoSeedData;
 
 
@@ -23,7 +24,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure()));
+
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -36,7 +39,11 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-
+builder.Configuration
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddJsonFile("appsettings.Docker.json", optional: true) // ← أضف هذا السطر
+    .AddEnvironmentVariables();
 
 var JwtSecretkey = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]);
 var tokenValidationParameters = new TokenValidationParameters
@@ -176,9 +183,32 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate(); // 👈 Ensure database is created & schema applied
+
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    await SeedData.Initialize(services, userManager);
+
+    int retries = 5;
+    for (int i = 0; i < retries; i++)
+    {
+        try
+        {
+            await ToDoSeedData.SeedData.Initialize(services, userManager);
+            Console.WriteLine("✅ Seeding succeeded.");
+            break;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Seeding attempt {i + 1} failed: {ex.Message}");
+            if (i == retries - 1)
+                throw;
+
+            await Task.Delay(5000);
+        }
+    }
 }
+
+
 
 
 
