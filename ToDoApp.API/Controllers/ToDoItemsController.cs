@@ -179,8 +179,7 @@ namespace ToDoApp.API.Controllers
                 _logger.LogError(ex, "Error creating new ToDo item.");
                 throw; // إعادة رمي الاستثناء ليتم التعامل معه في Middleware
             }
-            //var createdItem = _toDoItemService.CreateAsync(toDoItem);
-            //return CreatedAtAction(nameof(Get), new { id = createdItem.Id }, createdItem);
+
         }
 
         // PUT: api/ToDoItems/5

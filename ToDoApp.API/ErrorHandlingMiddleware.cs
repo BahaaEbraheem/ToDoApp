@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿
+using System.Text.Json;
 
 namespace ToDoApp.API
 {
@@ -28,16 +29,26 @@ namespace ToDoApp.API
 
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/json";
 
-            var response = new
-            {
-                message = "An unexpected error occurred.",
-                details = exception.Message
-            };
+            int statusCode = StatusCodes.Status500InternalServerError;
+            string message = "An unexpected error occurred.";
 
-            return context.Response.WriteAsync(JsonConvert.SerializeObject(response));
+            if (exception is ApplicationException)
+            {
+                statusCode = StatusCodes.Status400BadRequest;
+                message = exception.Message;
+            }
+
+            context.Response.StatusCode = statusCode;
+
+            var result = JsonSerializer.Serialize(new
+            {
+                StatusCode = statusCode,
+                Message = message
+            });
+
+            return context.Response.WriteAsync(result);
         }
     }
 

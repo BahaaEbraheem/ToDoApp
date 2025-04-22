@@ -1,0 +1,220 @@
+{
+	"id": "9f9225d8-c106-497b-bdc1-990c6d60eeb8",
+	"name": "Elkood",
+	"timestamp": "2025-04-22T09:30:18.963Z",
+	"collection_id": "16308516-c32c6ab7-54ea-4b25-8c58-4e03c2d4612c",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 0,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-04-22T09:30:17.939Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "7380daca-01b3-4e97-a632-35a3a36b9363",
+			"name": "Login",
+			"url": "http://localhost:7112/api/Auth/login",
+			"time": 104,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				104
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "8f480364-4149-4e0c-a252-2d6f55115168",
+			"name": "GetToDoItems",
+			"url": "http://localhost:7112/api/ToDoItems",
+			"time": 8,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				8
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "ad5b9452-99a0-4056-86bc-f27d608e97e1",
+			"name": "register",
+			"url": "http://localhost:7112/api/Auth/register",
+			"time": 71,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				71
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "961feb15-1d29-4d0b-86ba-f73a6f9c2427",
+			"name": "Create",
+			"url": "http://localhost:7112/api/ToDoItems/",
+			"time": 8,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				8
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "51870b22-515b-4593-b552-f77b37f63b00",
+			"name": "Put",
+			"url": "http://localhost:7112/api/ToDoItems/fb68ea4a-0ee2-4705-bdc3-090c7b5e9a6d",
+			"time": 8,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				8
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "02c7bf2d-45ea-4d52-b828-6b3a6fc57747",
+			"name": "Delete",
+			"url": "http://localhost:7112/api/ToDoItems/40d1d5eb-597a-4c4e-b420-c4cc08cfcba6",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				17
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "9aa63133-8cd6-48f4-9219-a38e35817b69",
+			"name": "GetById",
+			"url": "http://localhost:7112/api/ToDoItems/afb058d7-e761-4b2e-83f4-ad486004db08",
+			"time": 19,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				19
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "2eb3373b-569d-4469-a944-166246bfd1a2",
+			"name": "SetComplete",
+			"url": "http://localhost:7112/api/ToDoItems/afb058d7-e761-4b2e-83f4-ad486004db08/complete?isCompleted=true",
+			"time": 13,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				13
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "fed92d1f-e42c-42d3-b147-88729308217e",
+			"name": "SetUnComplete",
+			"url": "http://localhost:7112/api/ToDoItems/afb058d7-e761-4b2e-83f4-ad486004db08/complete?isCompleted=false",
+			"time": 13,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				13
+			],
+			"allTests": [
+				{}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 261,
+	"collection": {
+		"requests": [
+			{
+				"id": "7380daca-01b3-4e97-a632-35a3a36b9363",
+				"method": "POST"
+			},
+			{
+				"id": "8f480364-4149-4e0c-a252-2d6f55115168",
+				"method": "GET"
+			},
+			{
+				"id": "ad5b9452-99a0-4056-86bc-f27d608e97e1",
+				"method": "POST"
+			},
+			{
+				"id": "961feb15-1d29-4d0b-86ba-f73a6f9c2427",
+				"method": "POST"
+			},
+			{
+				"id": "51870b22-515b-4593-b552-f77b37f63b00",
+				"method": "PUT"
+			},
+			{
+				"id": "02c7bf2d-45ea-4d52-b828-6b3a6fc57747",
+				"method": "DELETE"
+			},
+			{
+				"id": "9aa63133-8cd6-48f4-9219-a38e35817b69",
+				"method": "GET"
+			},
+			{
+				"id": "2eb3373b-569d-4469-a944-166246bfd1a2",
+				"method": "PATCH"
+			},
+			{
+				"id": "fed92d1f-e42c-42d3-b147-88729308217e",
+				"method": "PATCH"
+			}
+		]
+	}
+}

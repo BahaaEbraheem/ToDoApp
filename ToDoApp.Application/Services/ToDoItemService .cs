@@ -45,6 +45,12 @@ public class ToDoItemService : IToDoItemService
         try
         {
             var toDoItem = _mapper.Map<ToDoItem>(toDoItemCreteDto);
+            var existingItem =  _repository.GetByTitleAsync(toDoItemCreteDto.Title);
+            if (existingItem != null)
+            {
+                _logger.LogWarning($"ToDo item with title '{toDoItemCreteDto.Title}' already exists.");
+                throw new ApplicationException($"A ToDo item with the title '{toDoItemCreteDto.Title}' already exists.");
+            }
             _repository.CreateAsync(toDoItem);
    
             _logger.LogInformation($"Created ToDo item with ID: {toDoItem.Id}");
@@ -53,7 +59,7 @@ public class ToDoItemService : IToDoItemService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while creating ToDo item.");
-            throw new ApplicationException("An error occurred while creating the ToDo item.", ex);
+             throw ;
         }
     }
 
@@ -62,11 +68,19 @@ public class ToDoItemService : IToDoItemService
         _logger.LogInformation($"Updating ToDo item with ID: {id}.");
         try
         {
+         
             var existingItem =  _repository.GetByIdAsync(id);
             if (existingItem == null)
             {
                 _logger.LogWarning($"ToDo item with ID: {id} not found.");
                 return false;
+            }
+            // Check if another item with the same title exists (excluding the current item)
+            var itemWithSameTitle =  _repository.GetByTitleAsync(toDoItemUpdateDto.Title);
+            if (itemWithSameTitle != null && itemWithSameTitle.Id != id)  // Ensure the IDs don't match
+            {
+                _logger.LogWarning($"ToDo item with title '{toDoItemUpdateDto.Title}' already exists.");
+                throw new ApplicationException($"A ToDo item with the title '{toDoItemUpdateDto.Title}' already exists.");
             }
 
             // Mapping values
@@ -79,7 +93,7 @@ public class ToDoItemService : IToDoItemService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while updating ToDo item.");
-            throw new ApplicationException($"An error occurred while updating the ToDo item with ID: {id}.", ex);
+            throw ;
         }
     }
 
@@ -102,7 +116,7 @@ public class ToDoItemService : IToDoItemService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while deleting ToDo item.");
-            throw new ApplicationException($"An error occurred while deleting the ToDo item with ID: {id}.", ex);
+            throw ;
         }
     }
     public async Task<int> GetTotalCountAsync(string? qyerySearch, string? title, string? category, string? priority, bool? isCompleted)
@@ -181,65 +195,6 @@ public class ToDoItemService : IToDoItemService
             PageSize = pageSize
         };
     }
-    //public async Task<PagedResult<ToDoItemDto>> FilterAsync(
-    //    string? keyword,
-    //    string? category,
-    //    string? priority,
-    //    bool? isCompleted,
-    //    string? sortBy = "CreatedAt",
-    //    bool isDesc = false,
-    //    int page = 1,
-    //    int pageSize = 10)
-    //{
-    //    _logger.LogInformation("Filtering ToDo items.");
-    //    try
-    //    {
-    //        var query = _repository.QueryAll();
-
-    //        if (!string.IsNullOrEmpty(keyword))
-    //        {
-    //            query = query.Where(t =>
-    //                t.Title.Contains(keyword) ||
-    //                t.Description.Contains(keyword) ||
-    //                t.Category.Contains(keyword) ||
-    //                t.Priority.Contains(keyword));
-    //        }
-
-    //        if (!string.IsNullOrEmpty(category))
-    //            query = query.Where(t => t.Category == category);
-
-    //        if (!string.IsNullOrEmpty(priority))
-    //            query = query.Where(t => t.Priority == priority);
-
-    //        if (isCompleted.HasValue)
-    //            query = query.Where(t => t.IsCompleted == isCompleted);
-
-    //        var totalCount = await query.CountAsync(); // العدد الكلي قبل التقطيع
-
-    //        query = sortBy switch
-    //        {
-    //            "Title" => isDesc ? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title),
-    //            "Priority" => isDesc ? query.OrderByDescending(t => t.Priority) : query.OrderBy(t => t.Priority),
-    //            _ => isDesc ? query.OrderByDescending(t => t.CreatedAt) : query.OrderBy(t => t.CreatedAt)
-    //        };
-
-    //        var result = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-    //        var dtoList = _mapper.Map<IEnumerable<ToDoItemDto>>(result);
-
-    //        return new PagedResult<ToDoItemDto>
-    //        {
-    //            Items = dtoList,
-    //            TotalCount = totalCount,
-    //            PageNumber = page,
-    //            PageSize = pageSize
-    //        };
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Error occurred while filtering ToDo items.");
-    //        throw new ApplicationException("An error occurred while filtering the ToDo items.", ex);
-    //    }
-    //}
 
 
     public async Task<bool> SetCompletedStatusAsync(Guid id, bool isCompleted)

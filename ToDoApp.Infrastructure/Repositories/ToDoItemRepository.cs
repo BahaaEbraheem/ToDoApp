@@ -26,7 +26,12 @@ namespace ToDoApp.Infrastructure.Repositories
         {
             return await _context.ToDoItems.ToListAsync();
         }
-
+        public ToDoItem GetByTitleAsync(string title)
+        {
+            return  _context.ToDoItems
+                                   .Where(item => item.Title == title)
+                                   .FirstOrDefault();
+        }
         public ToDoItem GetByIdAsync(Guid id)
         {
             return _context.ToDoItems.Find(id);

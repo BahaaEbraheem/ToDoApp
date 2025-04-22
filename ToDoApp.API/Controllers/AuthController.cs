@@ -27,15 +27,6 @@ namespace ToDoApp.API.Controllers
 
         }
 
-        [HttpGet("authenticated")]
-        public IActionResult AuthenticatedEndpoint()
-        {
-            var isAuthenticated = HttpContext.User.Identity?.IsAuthenticated;
-            var userName = HttpContext.User.Identity?.Name;
-            var claims = HttpContext.User.Claims.ToList();
-
-            return Ok(new { IsAuthenticated = isAuthenticated, UserName = userName, Claims = claims });
-        }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)

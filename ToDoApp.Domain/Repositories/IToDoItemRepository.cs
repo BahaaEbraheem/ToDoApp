@@ -17,6 +17,6 @@ namespace ToDoApp.Domain.Repositories
         ToDoItem UpdateAsync(ToDoItem toDoItem);
         Task DeleteAsync(Guid id);
         Task<ToDoItem?> FindAsync(Guid id);
-
+        ToDoItem? GetByTitleAsync(string title);
     }
 }
